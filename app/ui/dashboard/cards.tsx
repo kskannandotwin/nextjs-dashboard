@@ -3,9 +3,15 @@ import {
   ClockIcon,
   UserGroupIcon,
   InboxIcon,
-} from '@heroicons/react/24/outline';
-import { lusitana } from '@/app/ui/fonts';
-
+} from "@heroicons/react/24/outline";
+import { lusitana } from "@/app/ui/fonts";
+import {
+  fetchCardData,
+  fetchLatestInvoices,
+  fetchRevenue,
+} from "@/app/lib/data";
+import LatestInvoices from "./latest-invoices";
+import RevenueChart from "./revenue-chart";
 const iconMap = {
   collected: BanknotesIcon,
   customers: UserGroupIcon,
@@ -14,18 +20,35 @@ const iconMap = {
 };
 
 export default async function CardWrapper() {
+  const revenue = await fetchRevenue();
+  const latestInvoices = await fetchLatestInvoices();
+  const {
+    numberOfInvoices,
+    numberOfCustomers,
+    totalPaidInvoices,
+    totalPendingInvoices,
+  } = await fetchCardData();
   return (
     <>
+      <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
+        Dashboard
+      </h1>
       {/* NOTE: Uncomment this code in Chapter 9 */}
 
-      {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-      <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
-      /> */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Card title="Collected" value={totalPaidInvoices} type="collected" />
+        <Card title="Pending" value={totalPendingInvoices} type="pending" />
+        <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
+        <Card
+          title="Total Customers"
+          value={numberOfCustomers}
+          type="customers"
+        />
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
+        <RevenueChart revenue={revenue} />
+        <LatestInvoices latestInvoices={latestInvoices} />
+      </div>
     </>
   );
 }
@@ -37,7 +60,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected';
+  type: "invoices" | "customers" | "pending" | "collected";
 }) {
   const Icon = iconMap[type];
 
